@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowDown, CheckCircle, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import './Hero/Hero.css'; 
 
 const Hero: React.FC = () => {
   const scrollToDetector = () => {
@@ -10,10 +11,26 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
-      {/* Background Elements */}
+      
       <div className="absolute inset-0 bg-gradient-hero opacity-5" />
-      <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+      
+      {/* Orb 1: Top left side */}
+      <div 
+        className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-random-move-slow"
+        style={{ animationDelay: '2s' }}
+      ></div>
+      
+      {/* Orb 2: Bottom right */}
+      <div 
+        className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-accent/10 blur-3xl animate-random-move-fast"
+        style={{ animationDelay: '0s' }}
+      ></div>
+      
+      {/* Orb 3: In the middle */}
+      <div 
+        className="absolute top-1/3 left-1/2 w-64 h-64 rounded-full bg-blue-500/20 blur-3xl animate-random-move-medium"
+        style={{ animationDelay: '4s' }}
+      ></div>
       
       <div className="container relative px-4">
         <div className="mx-auto max-w-4xl text-center">
