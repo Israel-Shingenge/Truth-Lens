@@ -26,10 +26,10 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/youth-voices" element={<YouthVoicesHub />} />
+            <Route path="/resources" element={<Resources />} />
             <Route path="/critical-thinking" element={<CriticalThinkingZone />} />
             <Route path="/insight-dashboard" element={<InsightDashboard />} />
             <Route path="/account" element={<Account />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
