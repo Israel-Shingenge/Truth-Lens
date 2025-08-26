@@ -1,0 +1,35 @@
+@keyframes random-move-slow {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-10vw, 5vh, 0); }
+  50% { transform: translate3d(20vw, -10vh, 0); }
+  75% { transform: translate3d(-15vw, -5vh, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes random-move-medium {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(5vw, -10vh, 0); }
+  50% { transform: translate3d(-15vw, 15vh, 0); }
+  75% { transform: translate3d(10vw, 5vh, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes random-move-fast {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(-20vw, 10vh, 0); }
+  50% { transform: translate3d(25vw, -15vh, 0); }
+  75% { transform: translate3d(-10vw, 5vh, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.animate-random-move-slow {
+  animation: random-move-slow 20s infinite alternate;
+}
+
+.animate-random-move-medium {
+  animation: random-move-medium 15s infinite alternate;
+}
+
+.animate-random-move-fast {
+  animation: random-move-fast 10s infinite alternate;
+}
