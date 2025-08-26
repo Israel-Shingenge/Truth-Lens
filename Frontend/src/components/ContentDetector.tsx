@@ -150,25 +150,7 @@ const ContentDetector: React.FC = () => {
 
   return (
     <section id="detector" className="py-20 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5">
-        <div className="absolute inset-0">
-          {/* Floating AI/Tech Elements */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-primary/30 rounded-full animate-pulse" 
-               style={{ animationDelay: '0s', animationDuration: '3s' }} />
-          <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-accent/40 rounded-full animate-pulse" 
-               style={{ animationDelay: '1s', animationDuration: '4s' }} />
-          <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-primary/20 rounded-full animate-pulse" 
-               style={{ animationDelay: '2s', animationDuration: '5s' }} />
-          <div className="absolute bottom-1/3 right-1/4 w-1 h-1 bg-accent/30 rounded-full animate-pulse" 
-               style={{ animationDelay: '1.5s', animationDuration: '3.5s' }} />
-          
-          {/* Scanning Lines */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent w-1/3 animate-scan" />
-          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-accent/10 to-transparent w-1/4 animate-scan-reverse" />
-        </div>
-      </div>
-      
+
       <div className="container px-4 relative z-10">
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-12">

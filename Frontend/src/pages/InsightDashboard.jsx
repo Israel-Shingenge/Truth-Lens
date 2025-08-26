@@ -1,7 +1,7 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import EnhancedLeaderboard from '@/components/EnhancedLeaderboard';
+import EnhancedLeaderboard from '@/components/Leaderboard';
 import { TrendingUp, AlertTriangle, Users, FileText, BarChart3, Activity, Eye } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
