@@ -397,7 +397,7 @@ const InsightDashboard = () => {
               Partner with us to get customized insights and reports tailored to your organization's needs.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-white text-primary font-semibold rounded-lg hover-lift hover:shadow-glow transition-all duration-300">
+              <button className="px-8 py-4 bg-white text-accent font-semibold rounded-lg hover-lift hover:shadow-glow transition-all duration-300 border border-gray-300">
                 Request Partnership
               </button>
               <button className="px-8 py-4 border border-white/20 bg-white/10 text-white font-semibold rounded-lg hover-lift hover:bg-white/20 transition-all duration-300">

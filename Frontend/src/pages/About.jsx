@@ -171,7 +171,7 @@ const About = () => {
               Be part of the solution. Help us build a more informed digital future.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-white text-primary font-semibold rounded-lg hover-lift hover:shadow-glow transition-all duration-300">
+             <button className="px-8 py-4 bg-white text-accent font-semibold rounded-lg hover-lift hover:shadow-glow transition-all duration-300 border border-gray-300">
                 <Zap className="inline-block mr-2 h-5 w-5" />
                 Get Started
               </button>

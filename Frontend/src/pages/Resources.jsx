@@ -358,7 +358,7 @@ const Resources = () => {
               We can create customized materials for your organization, school, or community.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-white text-primary font-semibold hover-lift hover:shadow-glow">
+              <Button className="bg-white text-accent font-semibold hover-lift hover:shadow-glow border border-gray-300">
                 Request Custom Materials
               </Button>
               <Button variant="outline" className="border-white/20 bg-white/10 text-white hover-lift hover:bg-white/20">
