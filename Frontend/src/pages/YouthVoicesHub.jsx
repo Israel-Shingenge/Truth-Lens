@@ -165,7 +165,7 @@ const YouthVoicesHub = () => {
                 </TabsTrigger>
                 <TabsTrigger value="articles" className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
-                  Articles
+                  Discussions
                 </TabsTrigger>
                 <TabsTrigger value="featured" className="flex items-center gap-2">
                   <Star className="h-4 w-4" />

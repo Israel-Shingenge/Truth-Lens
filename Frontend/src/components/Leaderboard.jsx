@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/components/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-const EnhancedLeaderboard = () => {
+const Leaderboard = () => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [friendsData, setFriendsData] = useState([]);
   const [localData, setLocalData] = useState([]);
@@ -317,4 +317,4 @@ const EnhancedLeaderboard = () => {
   );
 };
 
-export default EnhancedLeaderboard;
+export default Leaderboard;
