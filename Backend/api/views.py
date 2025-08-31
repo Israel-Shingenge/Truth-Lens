@@ -5,8 +5,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from rest_framework import viewsets, permissions, filters
 from rest_framework.decorators import action
-from .serializer import QuestionSerializer, AnswerSerializer
-from .models import Question, Answer
+from .serializer import QuestionSerializer, AnswerSerializer, QuizSerializer, QuizSerializer2, QuizReadSerializer
+from .models import Question, Answer, Quiz
 
 class UserRegistrationView(generics.CreateAPIView):
     serializer_class = UserRegistrationSerializer
@@ -23,6 +23,9 @@ class UserRegistrationView(generics.CreateAPIView):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+class QuizViewSet(viewsets.ModelViewSet):
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
 
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all().order_by('-published_date')
@@ -56,3 +59,12 @@ class AnswerViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.AllowAny]
     filter_backends = [filters.SearchFilter]
     search_fields = ['content']
+
+class QuizViewSet2(viewsets.ModelViewSet):
+    queryset = Quiz.objects.all().prefetch_related('questions__answers')
+    
+    def get_serializer_class(self):
+        # POST/PUT/PATCH -> writable serializer; GET -> read serializer
+        if self.action in ('create', 'update', 'partial_update'):
+            return QuizSerializer2
+        return QuizReadSerializer
