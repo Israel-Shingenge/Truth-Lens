@@ -175,7 +175,7 @@ class QuestionOutSerializer(serializers.ModelSerializer):
 class QuizReadSerializer(serializers.ModelSerializer):
     # read-only nested tree
     difficulty_display = serializers.CharField(source='get_difficulty_display', read_only=True)
-    questions = QuestionOutSerializer(many=True, read_only=True, source="questions")
+    questions = QuestionOutSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
@@ -183,12 +183,3 @@ class QuizReadSerializer(serializers.ModelSerializer):
             'id', 'title', 'description', 'difficulty', 'difficulty_display',
             'time', 'category', 'questions'
         ]
-
-    # def get_questions(self, obj):
-    #     return [
-    #         {
-    #             "content": q.content,
-    #             "answers": [{"content": a.content, "correct": a.correct} for a in q.answers.all()]
-    #         }
-    #         for q in obj.questions.all().order_by('id')
-    #     ]
