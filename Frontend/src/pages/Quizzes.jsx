@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getQuizzes } from '../services/quizService';
 
 const Quizzes = () => {
   const { user } = useAuth();
@@ -32,115 +33,18 @@ const Quizzes = () => {
   const [gameResults, setGameResults] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
 
-  const quizzes = [
-    {
-      id: 1,
-      title: "Media Literacy Fundamentals",
-      description: "Test your basic understanding of media literacy concepts",
-      difficulty: 1,
-      category: "Fundamentals",
-      timeLimit: 180,
-      questions: [
-        {
-          question: "What is the primary purpose of fact-checking?",
-          options: [
-            "To support your existing beliefs",
-            "To verify the accuracy of information",
-            "To find interesting stories",
-            "To criticize the media"
-          ],
-          correct: 1,
-          explanation: "Fact-checking aims to verify the accuracy and truthfulness of information, helping people make informed decisions based on reliable data."
-        },
-        {
-          question: "Which of these is a red flag for potentially false information?",
-          options: [
-            "Multiple credible sources reporting the same story",
-            "Emotional language designed to provoke strong reactions",
-            "Clear author attribution and publication date",
-            "Citations to peer-reviewed research"
-          ],
-          correct: 1,
-          explanation: "Emotional language designed to manipulate feelings rather than present facts objectively is often a sign of biased or false information."
-        },
-        {
-          question: "What should you do before sharing news on social media?",
-          options: [
-            "Share immediately if it confirms your beliefs",
-            "Check if your friends have shared it",
-            "Verify the source and cross-check with other reliable sources",
-            "Only share if it has many likes"
-          ],
-          correct: 2,
-          explanation: "Always verify information from credible sources before sharing to prevent the spread of misinformation."
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: "Digital Footprints & Privacy",
-      description: "Understanding how your online activities create a digital trail",
-      difficulty: 2,
-      category: "Privacy",
-      timeLimit: 240,
-      questions: [
-        {
-          question: "What is a digital footprint?",
-          options: [
-            "Your physical location data",
-            "The trail of data you leave behind when using the internet",
-            "Your computer's memory usage",
-            "Your internet speed"
-          ],
-          correct: 1,
-          explanation: "A digital footprint is the trail of data you create while using the internet, including websites visited, emails sent, and information submitted online."
-        },
-        {
-          question: "Which information should you be most careful about sharing online?",
-          options: [
-            "Your favorite movie",
-            "Your full name, address, and phone number",
-            "Your hobbies",
-            "Your school subjects"
-          ],
-          correct: 1,
-          explanation: "Personal identifying information like full name, address, and phone number can be used for identity theft or other malicious purposes."
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: "Spotting Deepfakes & Manipulated Media",
-      description: "Advanced techniques for identifying artificially generated content",
-      difficulty: 4,
-      category: "Advanced Detection",
-      timeLimit: 300,
-      questions: [
-        {
-          question: "What is a deepfake?",
-          options: [
-            "A type of computer virus",
-            "AI-generated fake audio or video content",
-            "A social media filter",
-            "A type of cryptocurrency"
-          ],
-          correct: 1,
-          explanation: "Deepfakes use artificial intelligence to create convincing but fake audio or video content, often featuring people saying or doing things they never actually did."
-        },
-        {
-          question: "Which visual clue might indicate a deepfake video?",
-          options: [
-            "High video quality",
-            "Unnatural blinking patterns or lip sync issues",
-            "Professional lighting",
-            "Clear audio quality"
-          ],
-          correct: 1,
-          explanation: "Deepfakes often have telltale signs like unnatural blinking, poor lip synchronization, or inconsistent lighting that can help identify them as fake."
-        }
-      ]
-    }
-  ];
+  const [quizzes2, setQuizzes2] = useState([])
+
+  useEffect(() => {
+    const fetechQuizzes = async () => {
+      const quizzes = await getQuizzes();
+      setQuizzes2(quizzes)
+      console.log(quizzes2)
+    };
+    
+    fetechQuizzes()
+    console.log(quizzes2)
+  }, []);
 
   useEffect(() => {
     let timer;
@@ -163,7 +67,7 @@ const Quizzes = () => {
     setGameState('playing');
     setCurrentQuestion(0);
     setScore(0);
-    setTimeRemaining(quiz.timeLimit);
+    setTimeRemaining(quiz.time * 60);
     setSelectedAnswer(null);
     setShowExplanation(false);
     setUserAnswers([]);
@@ -174,12 +78,16 @@ const Quizzes = () => {
   };
 
   const submitAnswer = () => {
-    const isCorrect = selectedAnswer === selectedQuiz.questions[currentQuestion].correct;
+    // const isCorrect = selectedAnswer === selectedQuiz.questions[currentQuestion].correct;
+    const currentQ = selectedQuiz.questions[currentQuestion];
+    const selectedAnswerObj = currentQ.answers.find(answer => answer.id === selectedAnswer);
+    const isCorrect = selectedAnswerObj ? selectedAnswerObj.correct : false;
+
     const newAnswers = [...userAnswers, {
       questionIndex: currentQuestion,
       selectedAnswer,
       correct: isCorrect,
-      timeTaken: selectedQuiz.timeLimit - timeRemaining
+      timeTaken: (selectedQuiz.time * 60) - timeRemaining
     }];
     setUserAnswers(newAnswers);
     
@@ -202,7 +110,7 @@ const Quizzes = () => {
 
   const completeQuiz = () => {
     const finalScore = Math.round((score / selectedQuiz.questions.length) * 100);
-    const totalTime = selectedQuiz.timeLimit - timeRemaining;
+    const totalTime = (selectedQuiz.time * 60) - timeRemaining;
     
     setGameState('completed');
     setGameResults({
@@ -241,22 +149,22 @@ const Quizzes = () => {
 
   const getDifficultyColor = (level) => {
     switch (level) {
-      case 1: return 'text-green-500';
-      case 2: return 'text-blue-500';
-      case 3: return 'text-yellow-500';
-      case 4: return 'text-orange-500';
-      case 5: return 'text-red-500';
+      case 'Beginner': return 'text-green-500';
+      case 'Intermediate': return 'text-blue-500';
+      case 'Advanced': return 'text-yellow-500';
+      case 'Expert': return 'text-orange-500';
+      case 'Master': return 'text-red-500';
       default: return 'text-muted-foreground';
     }
   };
 
   const getDifficultyLabel = (level) => {
     switch (level) {
-      case 1: return 'Beginner';
-      case 2: return 'Intermediate';
-      case 3: return 'Advanced';
-      case 4: return 'Expert';
-      case 5: return 'Master';
+      case 'Beginner': return 'Beginner';
+      case 'Intermediate': return 'Intermediate';
+      case 'Advanced': return 'Advanced';
+      case 'Expert': return 'Expert';
+      case 'Master': return 'Master';
       default: return 'Unknown';
     }
   };
@@ -313,25 +221,25 @@ const Quizzes = () => {
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-3">
                 <Brain className="h-6 w-6 text-primary" />
-                {currentQ.question}
+                {currentQ.content}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {!showExplanation ? (
                 <>
                   <div className="space-y-3">
-                    {currentQ.options.map((option, index) => (
+                    {currentQ.answers.map((answer, index) => (
                       <Button
-                        key={index}
-                        variant={selectedAnswer === index ? "default" : "outline"}
+                        key={answer.id}
+                        variant={selectedAnswer === answer.id ? "default" : "outline"}
                         className="w-full text-left justify-start h-auto p-4"
-                        onClick={() => selectAnswer(index)}
+                        onClick={() => selectAnswer(answer.id)}
                       >
                         <div className="flex items-center space-x-3">
                           <div className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-medium">{String.fromCharCode(65 + index)}</span>
                           </div>
-                          <span className="text-sm">{option}</span>
+                          <span className="text-sm">{answer.content}</span>
                         </div>
                       </Button>
                     ))}
@@ -351,22 +259,28 @@ const Quizzes = () => {
                 <div className="space-y-6">
                   {/* Answer Feedback */}
                   <div className="text-center">
-                    {selectedAnswer === currentQ.correct ? (
-                      <div className="space-y-2">
-                        <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-                        <h3 className="text-2xl font-bold text-green-600">Correct!</h3>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <XCircle className="h-16 w-16 text-red-500 mx-auto" />
-                        <h3 className="text-2xl font-bold text-red-600">Incorrect</h3>
-                        <p className="text-muted-foreground">
-                          The correct answer was: <span className="font-semibold">
-                            {currentQ.options[currentQ.correct]}
-                          </span>
-                        </p>
-                      </div>
-                    )}
+                    {(() => {
+                      const selectedAnswerObj = currentQ.answers.find(answer => answer.id === selectedAnswer);
+                      const isCorrect = selectedAnswerObj ? selectedAnswerObj.correct : false;
+                      const correctAnswer = currentQ.answers.find(answer => answer.correct);
+                      
+                      return isCorrect ? (
+                        <div className="space-y-2">
+                          <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
+                          <h3 className="text-2xl font-bold text-green-600">Correct!</h3>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <XCircle className="h-16 w-16 text-red-500 mx-auto" />
+                          <h3 className="text-2xl font-bold text-red-600">Incorrect</h3>
+                          <p className="text-muted-foreground">
+                            The correct answer was: <span className="font-semibold">
+                              {correctAnswer ? correctAnswer.content : 'Unknown'}
+                            </span>
+                          </p>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Explanation */}
@@ -375,7 +289,9 @@ const Quizzes = () => {
                       <Lightbulb className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
                       <div>
                         <h4 className="font-semibold text-lg mb-2">Explanation</h4>
-                        <p className="text-muted-foreground leading-relaxed">{currentQ.explanation}</p>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {currentQ.explanation || 'No explanation available for this question.'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -475,13 +391,13 @@ const Quizzes = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {quizzes.map((quiz) => (
+          {quizzes2.map((quiz) => (
             <Card key={quiz.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-xl">{quiz.title}</CardTitle>
-                  <Badge variant="outline" className={getDifficultyColor(quiz.difficulty)}>
-                    {getDifficultyLabel(quiz.difficulty)}
+                  <Badge variant="outline" className={getDifficultyColor(quiz.difficulty_display)}>
+                    {getDifficultyLabel(quiz.difficulty_display)}
                   </Badge>
                 </div>
                 <CardDescription>{quiz.description}</CardDescription>
@@ -491,7 +407,8 @@ const Quizzes = () => {
                   <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center">
                       <Timer className="h-4 w-4 mr-2" />
-                      {formatTime(quiz.timeLimit)}
+                      {/* {formatTime(quiz.timeLimit)} */}
+                      {formatTime(quiz.time * 60)}
                     </div>
                     <div className="flex items-center">
                       <Brain className="h-4 w-4 mr-2" />
@@ -503,7 +420,7 @@ const Quizzes = () => {
                     </div>
                     <div className="flex items-center">
                       <Target className="h-4 w-4 mr-2" />
-                      Level {quiz.difficulty}
+                      Level {quiz.difficulty_display}
                     </div>
                   </div>
                   
