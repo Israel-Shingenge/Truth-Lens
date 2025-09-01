@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Leaderboard polish */
+html body .rounded-2xl, html body .rounded-3xl {
+  border-radius: 18px;
+}
+

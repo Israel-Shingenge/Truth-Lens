@@ -1,320 +1,189 @@
-import React, { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, Crown, Users, Globe, MapPin, Filter, Search } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAuth } from '@/components/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+// /src/components/Leaderboard.jsx
+import React from "react";
 
-const EnhancedLeaderboard = () => {
-  const [leaderboardData, setLeaderboardData] = useState([]);
-  const [friendsData, setFriendsData] = useState([]);
-  const [localData, setLocalData] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentView, setCurrentView] = useState('global');
-  const [timeRange, setTimeRange] = useState('all-time');
-  const { user, profile } = useAuth();
+import goldPng from "../assets/trophygold.png";
+import silverPng from "../assets/trophysilver.png";
+import bronzePng from "../assets/trophybronze.png";
 
-  useEffect(() => {
-    fetchLeaderboardData();
-  }, [timeRange, user]);
+// real badge icons
+import grinderPng from "../assets/QuizGrinderBadge.png";
+import thinkerPng from "../assets/QuizThinkerBadge.png";
+import superBrainPng from "../assets/SuperBrainBadge.png";
 
-  const fetchLeaderboardData = async () => {
-    try {
-      // Fetch global leaderboard
-      const { data: globalData, error: globalError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('total_points', { ascending: false })
-        .limit(50);
+// sample avatars
+import bearPng    from "../assets/sampleAvatars/bear.png";
+import catPng     from "../assets/sampleAvatars/cat.png";
+import dogPng     from "../assets/sampleAvatars/dog.png";
+import manPng     from "../assets/sampleAvatars/man.png";
+import meerkatPng from "../assets/sampleAvatars/meerkat.png";
+import pandaPng   from "../assets/sampleAvatars/panda.png";
+import rabbitPng  from "../assets/sampleAvatars/rabbit.png";
 
-      if (globalError) throw globalError;
-      setLeaderboardData(globalData || []);
+// pick from this pool (wraps with modulo so it's easy to vary)
+const AVATARS = [bearPng, catPng, dogPng, manPng, meerkatPng, pandaPng, rabbitPng];
 
-      if (user) {
-        // Fetch friends leaderboard
-        const { data: friendsData, error: friendsError } = await supabase
-          .from('friendships')
-          .select(`
-            addressee_id,
-            requester_id,
-            profiles!friendships_addressee_id_fkey (*),
-            profiles!friendships_requester_id_fkey (*)
-          `)
-          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-          .eq('status', 'accepted');
+// sizes
+const TROPHY_SIZE = 55;
+const BADGE_SIZE = 35; // change this to resize badges
 
-        if (!friendsError && friendsData) {
-          const friendProfiles = friendsData.map(friendship => 
-            friendship.requester_id === user.id 
-              ? friendship.profiles 
-              : friendship.profiles
-          ).filter(Boolean);
-          
-          setFriendsData(friendProfiles);
-        }
+// palette
+const SURFACE     = "#0f141d";
+const SURFACE_HDR = "#0b1118";
+const ROW_DIVIDER = "#1a2130";
+const HOVER_ROW   = "#131a20";
+const RADIUS_PX   = 10;
 
-        // Fetch local leaderboard (same location)
-        if (profile?.location) {
-          const { data: localData, error: localError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('location', profile.location)
-            .order('total_points', { ascending: false })
-            .limit(20);
+// --------- tiny helpers ----------
+const TrophyIcon = ({ src, alt, size }) => (
+  <img src={src} alt={alt} width={size} height={size}
+       style={{ width: size, height: size, display: "block", flexShrink: 0 }} />
+);
+const TrophyGold   = ({ size = TROPHY_SIZE }) => <TrophyIcon src={goldPng}   alt="Gold Trophy"   size={size} />;
+const TrophySilver = ({ size = TROPHY_SIZE }) => <TrophyIcon src={silverPng} alt="Silver Trophy" size={size} />;
+const TrophyBronze = ({ size = TROPHY_SIZE }) => <TrophyIcon src={bronzePng} alt="Bronze Trophy" size={size} />;
 
-          if (!localError) {
-            setLocalData(localData || []);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching leaderboard:', error);
-    }
-  };
+const Avatar = ({ src, alt, size = 56, className = "" }) => (
+  <img
+    src={src}
+    alt={alt || "avatar"}
+    style={{ width: size, height: size }}
+    className={`rounded-full object-cover ${className}`}
+  />
+);
 
-  const getRankIcon = (position) => {
-    switch (position) {
-      case 1: return <Crown className="h-5 w-5 text-yellow-500" />;
-      case 2: return <Medal className="h-5 w-5 text-gray-400" />;
-      case 3: return <Award className="h-5 w-5 text-amber-600" />;
-      default: return <Trophy className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
+const Badge = ({ img, alt, count, size = BADGE_SIZE }) => (
+  <div className="flex flex-col items-center gap-1">
+    <img src={img} alt={alt} width={size} height={size}
+         style={{ width: size, height: size, display: "block" }} />
+    <span className="text-white/80 text-sm font-medium">{count}</span>
+  </div>
+);
 
-  const getRankColor = (position) => {
-    switch (position) {
-      case 1: return 'bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border-yellow-500/30';
-      case 2: return 'bg-gradient-to-r from-gray-400/20 to-slate-500/20 border-gray-400/30';
-      case 3: return 'bg-gradient-to-r from-amber-600/20 to-orange-500/20 border-amber-600/30';
-      default: return 'bg-background-alt border-card-border';
-    }
-  };
-
-  const getBadgeForLevel = (level, points) => {
-    if (level >= 20) return { text: 'Legend', variant: 'default', color: 'text-purple-500' };
-    if (level >= 15) return { text: 'Master', variant: 'secondary', color: 'text-blue-500' };
-    if (level >= 10) return { text: 'Expert', variant: 'outline', color: 'text-green-500' };
-    if (level >= 5) return { text: 'Advanced', variant: 'outline', color: 'text-orange-500' };
-    return { text: 'Novice', variant: 'outline', color: 'text-gray-500' };
-  };
-
-  const filterUsers = (users) => {
-    if (!searchTerm) return users;
-    return users.filter(user => 
-      user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  };
-
-  const LeaderboardList = ({ users, showLocation = false }) => {
-    const filteredUsers = filterUsers(users);
-    
-    return (
-      <div className="space-y-3">
-        {filteredUsers.map((user, index) => {
-          const position = index + 1;
-          const badge = getBadgeForLevel(user.level || 1, user.total_points || 0);
-          const isCurrentUser = user.user_id === profile?.user_id;
-          
-          return (
-            <Card 
-              key={user.id} 
-              className={`${getRankColor(position)} ${isCurrentUser ? 'ring-2 ring-primary' : ''} glass-card hover-lift transition-all duration-300`}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 min-w-[60px]">
-                      {getRankIcon(position)}
-                      <span className="font-bold text-lg">#{position}</span>
-                    </div>
-                    
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage src={user.avatar_url} />
-                      <AvatarFallback>{user.display_name?.[0] || 'A'}</AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold">
-                          {user.display_name || user.username || 'Anonymous'}
-                          {isCurrentUser && <Badge variant="outline" className="ml-2 text-xs">You</Badge>}
-                        </h4>
-                        <Badge variant={badge.variant} className={`text-xs ${badge.color}`}>
-                          {badge.text}
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <Trophy className="h-3 w-3" />
-                          Level {user.level || 1}
-                        </span>
-                        {showLocation && user.location && (
-                          <span className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {user.location}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="text-right">
-                    <div className="font-bold text-lg gradient-text">
-                      {user.total_points?.toLocaleString() || 0}
-                    </div>
-                    <div className="text-xs text-muted-foreground">points</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-        
-        {filteredUsers.length === 0 && (
-          <Card className="glass-card">
-            <CardContent className="p-8 text-center">
-              <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">
-                {searchTerm ? 'No users found matching your search.' : 'No data available.'}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  };
-
+// --------- card ----------
+function LeaderCard({ user, trophy }) {
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold flex items-center gap-2">
-            <Trophy className="h-8 w-8 text-primary" />
-            Leaderboard
-          </h2>
-          <p className="text-muted-foreground mt-1">
-            Compete with truth seekers worldwide
-          </p>
+    <div
+      className="p-6 flex-1 flex flex-col gap-4 shadow-md"
+      style={{ backgroundColor: SURFACE, border: `1px solid ${SURFACE}`, borderRadius: `${RADIUS_PX}px` }}
+    >
+      {/* HEADER: avatar + name on the left, trophy on the right */}
+      <div className="flex items-start justify-between w-full">
+        <div className="flex items-center gap-3">
+          <Avatar src={user.avatar} alt={user.name} size={52} />
+          <div className="text-white font-semibold text-lg leading-tight">{user.name}</div>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className="px-3 py-2 bg-background border border-input rounded-md text-sm"
-          >
-            <option value="all-time">All Time</option>
-            <option value="monthly">This Month</option>
-            <option value="weekly">This Week</option>
-            <option value="daily">Today</option>
-          </select>
-        </div>
+        {trophy}
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search users..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-      </div>
-
-      {/* Leaderboard Tabs */}
-      <Tabs value={currentView} onValueChange={setCurrentView} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="global" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            Global
-          </TabsTrigger>
-          <TabsTrigger value="friends" className="flex items-center gap-2" disabled={!user}>
-            <Users className="h-4 w-4" />
-            Friends
-          </TabsTrigger>
-          <TabsTrigger value="local" className="flex items-center gap-2" disabled={!profile?.location}>
-            <MapPin className="h-4 w-4" />
-            Local
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="global" className="mt-6">
-          <LeaderboardList users={leaderboardData} showLocation={true} />
-        </TabsContent>
-
-        <TabsContent value="friends" className="mt-6">
-          {user ? (
-            <LeaderboardList users={friendsData} />
-          ) : (
-            <Card className="glass-card">
-              <CardContent className="p-8 text-center">
-                <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground mb-4">
-                  Sign in to see your friends' rankings
-                </p>
-                <Button onClick={() => window.location.href = '/auth'}>
-                  Sign In
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        <TabsContent value="local" className="mt-6">
-          {profile?.location ? (
-            <LeaderboardList users={localData} />
-          ) : (
-            <Card className="glass-card">
-              <CardContent className="p-8 text-center">
-                <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                <p className="text-muted-foreground mb-4">
-                  Add your location to see local rankings
-                </p>
-                <Button onClick={() => window.location.href = '/account'}>
-                  Update Profile
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      {/* Current User Rank Display */}
-      {user && profile && (
-        <Card className="glass-card border-primary/50 bg-primary/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={profile.avatar_url} />
-                  <AvatarFallback>{profile.display_name?.[0] || 'Y'}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h4 className="font-semibold">Your Rank</h4>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Trophy className="h-3 w-3" />
-                    Level {profile.level || 1} • {profile.total_points?.toLocaleString() || 0} points
-                  </div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="font-bold text-lg gradient-text">
-                  #{leaderboardData.findIndex(u => u.user_id === profile.user_id) + 1 || 'N/A'}
-                </div>
-                <div className="text-xs text-muted-foreground">global rank</div>
-              </div>
+      {/* MIDDLE: Level & Points centered with space */}
+      <div className="mt-1">
+        <div className="flex justify-center">
+          <div className="flex items-end gap-8">
+            <div className="text-center">
+              <div className="text-white/60 text-xs uppercase tracking-wide">Level</div>
+              <div className="text-white text-2xl font-bold leading-tight">{user.level}</div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+
+            <div className="text-center">
+              <div className="text-white/60 text-xs uppercase tracking-wide">Points</div>
+              <div className="text-white text-2xl font-bold leading-tight">{user.points}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── divider between stats and badges (moved down + more visible) ── */}
+      <div
+        className="h-px mt-6 mb-2"
+        style={{
+          // soft glow line so it stands out on dark cards
+          backgroundImage:
+            "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0) 100%)"
+        }}
+      />
+
+      {/* BOTTOM: three REAL badges with counts */}
+      <div className="grid grid-cols-3 gap-6 justify-items-center mt-2">
+        <Badge img={grinderPng} alt="Quiz Grinder badge"   count={user.badges?.[0] ?? 0} />
+        <Badge img={thinkerPng} alt="Quiz Thinker badge"   count={user.badges?.[1] ?? 0} />
+        <Badge img={superBrainPng} alt="Super Brain badge" count={user.badges?.[2] ?? 0} />
+      </div>
     </div>
   );
-};
+}
 
-export default EnhancedLeaderboard;
+// --------- page ----------
+export default function Leaderboard() {
+  // Top 3 cards with avatars
+  const top3 = [
+    { name: "BabyKnight", avatar: AVATARS[0], level: 27, points: 43045, badges: [4, 7, 2] },
+    { name: "Rootless",   avatar: AVATARS[1], level: 22, points: 38910, badges: [3, 6, 1] },
+    { name: "Teodor2000", avatar: AVATARS[2], level: 19, points: 31200, badges: [2, 3, 5] },
+  ];
+
+  // Table rows with avatars (rotate through pool)
+  const rest = [
+    { place: 4, name: "Rens",      level: 18, points: 29850, badges: [1, 2, 0], avatar: AVATARS[3] },
+    { place: 5, name: "Edwin",     level: 17, points: 28740, badges: [2, 1, 1], avatar: AVATARS[4] },
+    { place: 6, name: "FlyWithMe", level: 14, points: 19890, badges: [0, 1, 3], avatar: AVATARS[5] },
+    { place: 8, name: "BigBob007", level: 13, points: 17600, badges: [1, 0, 2], avatar: AVATARS[6] },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div className="h-4 md:h-6" aria-hidden />
+      <div className="flex gap-6 mb-6 md:mb-7">
+        <LeaderCard user={top3[0]} trophy={<TrophyGold />} />
+        <LeaderCard user={top3[1]} trophy={<TrophySilver />} />
+        <LeaderCard user={top3[2]} trophy={<TrophyBronze />} />
+      </div>
+
+      {/* Table */}
+      <div
+        className="overflow-hidden shadow-md"
+        style={{ backgroundColor: SURFACE, border: `1px solid ${SURFACE}`, borderRadius: `${RADIUS_PX}px` }}
+      >
+        <table className="w-full text-left text-white/80 text-sm">
+          <thead>
+            <tr style={{ backgroundColor: SURFACE_HDR, color: "#fff" }}>
+              <th className="px-4 py-3">Place</th>
+              <th className="px-4 py-3">Username</th>
+              <th className="px-4 py-3">Level</th>
+              <th className="px-4 py-3">Points</th>
+              <th className="px-4 py-3">Badges</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rest.map((r, i) => {
+              const totalBadges = (r.badges || []).reduce((a, b) => a + b, 0);
+              const avatarSrc = r.avatar || AVATARS[i % AVATARS.length];
+              return (
+                <tr
+                  key={r.place}
+                  className="transition-colors"
+                  style={{ borderBottom: `1px solid ${ROW_DIVIDER}`, backgroundColor: "transparent" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = HOVER_ROW)}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                >
+                  <td className="px-4 py-3 text-white">{r.place}</td>
+
+                  {/* Username + avatar */}
+                  <td className="px-4 py-3 text-white">
+                    <div className="flex items-center gap-2">
+                      <Avatar src={avatarSrc} alt={r.name} size={32} />
+                      <span>{r.name}</span>
+                    </div>
+                  </td>
+
+                  <td className="px-4 py-3">{r.level}</td>
+                  <td className="px-4 py-3">{r.points}</td>
+                  <td className="px-4 py-3">{totalBadges}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

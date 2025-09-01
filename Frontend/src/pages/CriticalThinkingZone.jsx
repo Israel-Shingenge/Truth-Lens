@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import EnhancedLeaderboard from '@/components/Leaderboard';
 const CriticalThinkingZone = () => {
   const leaderboard = [
     { rank: 1, name: 'Alex M.', score: 2850, badge: '🏆' },
@@ -56,7 +56,8 @@ const CriticalThinkingZone = () => {
         {/* Games Section */}
         <section className="py-20">
           <div className="container">
-            <Tabs defaultValue="overview" className="w-full">
+            {/* <Tabs defaultValue="overview" className="w-full"> */}
+              <Tabs defaultValue="leaderboard" className="w-full">
               <TabsList className="grid w-full grid-cols-4 max-w-2xl mx-auto mb-12">
                 <TabsTrigger value="overview" className="flex items-center gap-2">
                   <Brain className="h-4 w-4" />
@@ -201,42 +202,11 @@ const CriticalThinkingZone = () => {
               </TabsContent>
 
               {/* Leaderboard */}
-              <TabsContent value="leaderboard">
-                <Card className="glass-card max-w-2xl mx-auto">
-                  <CardHeader className="text-center">
-                    <CardTitle className="text-2xl gradient-text">
-                      <Trophy className="inline-block mr-2 h-6 w-6" />
-                      Leaderboard
-                    </CardTitle>
-                    <p className="text-muted-foreground">Top media literacy champions</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {leaderboard.map((player) => (
-                        <div 
-                          key={player.rank}
-                          className={`flex items-center justify-between p-4 rounded-lg transition-all duration-300 hover-lift ${
-                            player.name === 'You' ? 'bg-gradient-primary/10 border border-primary/20' : 'bg-background-alt'
-                          }`}
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="text-2xl">{player.badge}</div>
-                            <div>
-                              <div className="font-semibold">{player.name}</div>
-                              <div className="text-sm text-muted-foreground">Rank #{player.rank}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-lg">{player.score.toLocaleString()}</div>
-                            <div className="text-sm text-muted-foreground">points</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
+              {/* Leaderboard */} <TabsContent value="leaderboard" >
+ <div className="mx-auto w-full max-w-[1320px] px-4">
+     <EnhancedLeaderboard />
+   </div>
+ </TabsContent>
               {/* Achievements */}
               <TabsContent value="achievements">
                 <Card className="glass-card max-w-2xl mx-auto">
